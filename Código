@@ -1,0 +1,48 @@
+using System;
+using System.Speech.Recognition;
+using UnityEngine;
+
+public class VoiceController : MonoBehaviour
+{
+    private SpeechRecognitionEngine recognizer;
+
+    void Start()
+    {
+        recognizer = new SpeechRecognitionEngine();
+        recognizer.SetInputToDefaultAudioDevice();
+
+        Choices spells = new Choices();
+        spells.Add(new string[] { "alohomora", "lumos", "nox" });
+
+        GrammarBuilder gb = new GrammarBuilder();
+        gb.Append(spells);
+
+        Grammar g = new Grammar(gb);
+        recognizer.LoadGrammar(g);
+
+        recognizer.SpeechRecognized += OnSpeechRecognized;
+        recognizer.RecognizeAsync(RecognizeMode.Multiple);
+    }
+
+    private void OnSpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+    {
+        string spell = e.Result.Text.ToLower();
+        Debug.Log("Feitiço reconhecido: " + spell);
+
+        if (spell == "alohomora")
+        {
+            // Aqui você chama a função para abrir a porta
+            FindObjectOfType<DoorController>().OpenDoor();
+        }
+        else if (spell == "lumos")
+        {
+            // Acender luz
+            FindObjectOfType<LightController>().TurnOn();
+        }
+    }
+
+    void OnApplicationQuit()
+    {
+        recognizer.Dispose();
+    }
+}
